@@ -12,9 +12,8 @@ class CarsListPage extends StatelessWidget {
   final user = FirebaseAuth.instance.currentUser!;
 
   Future<String> _getImageUrl(String model) async {
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('${user.uid}/Car Images/$model.png');
+    final ref =
+        FirebaseStorage.instance.ref().child('Cars/${user.email}/$model.png');
     return await ref.getDownloadURL();
   }
 

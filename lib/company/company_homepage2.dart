@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
@@ -29,7 +28,6 @@ class _CompanyHomePageState2 extends State<CompanyHomePage2> {
     });
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,11 +118,10 @@ class _CompanyHomePageState2 extends State<CompanyHomePage2> {
           _buildDrawerItem('Profile', Icons.person_outline, () {}),
           _buildDrawerItem('App Settings', Icons.settings_outlined, () {}),
           _buildDrawerItem('Logout', Icons.logout_outlined, () async {
-                  await FirebaseAuth.instance.signOut();
-                  // ignore: use_build_context_synchronously
-                  await Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => Main_Page()
-            ));
+            await FirebaseAuth.instance.signOut();
+            // ignore: use_build_context_synchronously
+            await Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (context) => Main_Page()));
           }),
         ],
       ),
@@ -144,7 +141,6 @@ class _CompanyHomePageState2 extends State<CompanyHomePage2> {
     final _brandController = TextEditingController();
     final _yearController = TextEditingController();
     final _priceController = TextEditingController();
-
 
     showDialog(
         context: context,
@@ -189,8 +185,9 @@ class _CompanyHomePageState2 extends State<CompanyHomePage2> {
 
                     final storageRef = FirebaseStorage.instance.ref();
                     Reference? imagesRef = storageRef
-                        .child(FirebaseAuth.instance.currentUser!.uid)
-                        .child('Car Images')
+                        .child('Cars')
+                        .child(FirebaseAuth.instance.currentUser?.email ??
+                            "no email")
                         .child('$model.png');
                     imagesRef.putFile(_selectedImage!);
                     try {
@@ -199,13 +196,12 @@ class _CompanyHomePageState2 extends State<CompanyHomePage2> {
                           .doc(FirebaseAuth.instance.currentUser?.email)
                           .collection("Cars")
                           .add(data);
-                          
                     } catch (e) {
                       print(e);
                     }
                   }
                   setState(() {
-                     _selectedImage = null;
+                    _selectedImage = null;
                   });
                   Navigator.of(context).pop();
                 },
@@ -217,9 +213,7 @@ class _CompanyHomePageState2 extends State<CompanyHomePage2> {
   }
 }
 
-
-class AddCarDialog extends StatefulWidget
-{
+class AddCarDialog extends StatefulWidget {
   final TextEditingController modelController;
   final TextEditingController brandController;
   final TextEditingController yearController;
@@ -237,66 +231,66 @@ class AddCarDialog extends StatefulWidget
 }
 
 class _AddCarDialogState extends State<AddCarDialog> {
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: widget.modelController,
-                  decoration: InputDecoration(
-                    hintText: 'Model',
-                  ),
-                ),
-                TextField(
-                  controller: widget.brandController,
-                  decoration: InputDecoration(
-                    hintText: 'Brand',
-                  ),
-                ),
-                TextField(
-                  controller: widget.yearController,
-                  decoration: InputDecoration(
-                    hintText: 'Year',
-                  ),
-                ),
-                TextField(
-                  controller: widget.priceController,
-                  decoration: InputDecoration(
-                    hintText: 'Price per day',
-                  ),
-                ),
-                SizedBox(height: 16.0),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                     final picker = ImagePicker();
-                    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: widget.modelController,
+          decoration: InputDecoration(
+            hintText: 'Model',
+          ),
+        ),
+        TextField(
+          controller: widget.brandController,
+          decoration: InputDecoration(
+            hintText: 'Brand',
+          ),
+        ),
+        TextField(
+          controller: widget.yearController,
+          decoration: InputDecoration(
+            hintText: 'Year',
+          ),
+        ),
+        TextField(
+          controller: widget.priceController,
+          decoration: InputDecoration(
+            hintText: 'Price per day',
+          ),
+        ),
+        SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () async {
+            final picker = ImagePicker();
+            final pickedFile =
+                await picker.pickImage(source: ImageSource.camera);
 
-                    setState(() {
-                      if (pickedFile != null) {
-                        _selectedImage = File(pickedFile.path);
-                      } else {
-                        print('No image selected.');
-                      }
-                    });
-                  },
-                  icon: Icon(Icons.image),
-                  label: Text('Upload Picture'),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.deepPurple,
-                  ),
-                ),
-                if (_selectedImage != null)
-                  Flexible(
-                    child: Image.file(
-                      _selectedImage!,
-                      height: 150,
-                      width: 150,
-                    ),
-                  ),
-              ],
-            );
+            setState(() {
+              if (pickedFile != null) {
+                _selectedImage = File(pickedFile.path);
+              } else {
+                print('No image selected.');
+              }
+            });
+          },
+          icon: Icon(Icons.image),
+          label: Text('Upload Picture'),
+          style: ElevatedButton.styleFrom(
+            primary: Colors.deepPurple,
+          ),
+        ),
+        if (_selectedImage != null)
+          Flexible(
+            child: Image.file(
+              _selectedImage!,
+              height: 150,
+              width: 150,
+            ),
+          ),
+      ],
+    );
   }
 }

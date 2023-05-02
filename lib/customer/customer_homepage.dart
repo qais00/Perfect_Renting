@@ -102,33 +102,21 @@ class CustomerHomePage extends StatelessWidget {
                 ),
               ],
             )),
-            body: StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance.collection('Cars').snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            body: StreamBuilder<List<Car>>(
+                stream: getCars(),
+                builder: (context, snapshot) {
+                  print('snapshot data length: ${snapshot.data?.length}');
+                  print('test4');
                   if (!snapshot.hasData) {
+                    print('test5');
                     return Center(child: CircularProgressIndicator());
                   }
-                  final cars = <Car>[];
-                  for (final doc in snapshot.data!.docs) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    final companyEmail = doc.id;
-                    final carsData = data['Cars'];
-                    if (carsData != null) {
-                      final carsList = carsData as List<dynamic>;
-                      for (final carData in carsData) {
-                        cars.add(Car(
-                          Model: carData(['Model']) ?? '',
-                          Price: carData['Price'].toString(),
-                          Brand: carData['Brand'] ?? '',
-                          companyEmail: companyEmail,
-                        ));
-                      }
-                    }
-                  }
+
+                  final cars = snapshot.data!;
                   return ListView.builder(
                     itemCount: cars.length,
                     itemBuilder: (BuildContext context, int index) {
+                      print('test1');
                       final car = cars[index];
                       return Card(
                         margin: EdgeInsets.all(10.0),
@@ -147,6 +135,7 @@ class CustomerHomePage extends StatelessWidget {
                                     if (snapshot.connectionState ==
                                             ConnectionState.done &&
                                         snapshot.data != null) {
+                                      print('test2');
                                       return Image.network(
                                         snapshot.data!,
                                         semanticLabel:
@@ -157,7 +146,7 @@ class CustomerHomePage extends StatelessWidget {
                                       );
                                     } else if (snapshot.hasError) {
                                       return Image.asset(
-                                        'car.png',
+                                        'assets\images\Car_icon_alone.png',
                                         height: 100,
                                         width: 120,
                                         fit: BoxFit.cover,
@@ -214,5 +203,31 @@ class CustomerHomePage extends StatelessWidget {
                     },
                   );
                 })));
+  }
+}
+
+Stream<List<Car>> getCars() async* {
+  final carsCollection = FirebaseFirestore.instance.collection('Cars');
+  final snapshot = await carsCollection.get();
+
+  for (final doc in snapshot.docs) {
+    final data = doc.data() as Map<String, dynamic>;
+    final companyEmail = doc.id;
+
+    final carsData =
+        await carsCollection.doc(companyEmail).collection('Cars').get();
+
+    if (carsData != null) {
+      final carsList = carsData.docs.map((car) => car.data()).toList();
+      final cars = carsList
+          .map((carData) => Car(
+                Model: carData['Model'] ?? '',
+                Price: carData['Price'].toString(),
+                Brand: carData['Brand'] ?? '',
+                companyEmail: companyEmail,
+              ))
+          .toList();
+      yield cars;
+    }
   }
 }
